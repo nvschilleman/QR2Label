@@ -1,8 +1,8 @@
 import io
 from simple_zpl2 import ZPLDocument
-from printfunctions import * 
 from PIL import Image
 import configparser
+import socket
 
 
 
@@ -23,12 +23,13 @@ class NetworkPrinter(object):
             s.settimeout(timeout)
             s.connect((self.ip, self.port))
             s.send(zpl_document.zpl_bytes)
+            print(zpl_document.zpl_bytes)
     
 
 class ZPLFunctions:
 
     def BuildLabel(self, listvar, qty):
-        DeliveryNumber, BagQty, BoxQty, DryQty, CustName, CustStreet, CustZip, CustCity, CustPhone = listvar
+        DeliveryNumber, BagQty, BoxQty, DryQty, CustName, CustStreet, CustZip, CustCity, CustPhone, Operator, DeliveryDate, OrderNr = listvar
         self.zpl = ZPLDocument()
 
         #Borders
@@ -60,6 +61,23 @@ class ZPLFunctions:
         self.zpl.add_field_block(180,1,0,'C')
         self.zpl.add_zpl_raw('^A0N,114,140')
         self.zpl.add_field_data(DryQty) #INSERT DRY
+        
+        self.zpl.add_field_origin(567, 223)
+        self.zpl.add_field_block(200,1,0,'C')
+        self.zpl.add_zpl_raw('^A0N,30,40')
+        self.zpl.add_field_data(Operator) #INSERT OPERATOR
+        
+        
+        self.zpl.add_field_origin(567, 295)
+        self.zpl.add_field_block(200,1,0,'C')
+        self.zpl.add_zpl_raw('^A0N,30,40')
+        self.zpl.add_field_data(OrderNr) #INSERT ORDER NUMBER
+        
+        self.zpl.add_field_origin(567, 368)
+        self.zpl.add_field_block(200,1,0,'C')
+        self.zpl.add_zpl_raw('^A0N,30,40')
+        self.zpl.add_field_data(DeliveryDate) #INSERT DELIVERY DATE     
+        
         # Labels
         self.zpl.add_zpl_raw('^FT31,228^A0N,24,36^FB269,1,0,C^FH\^FDBESTEMMING NR.^FS^FT26,421^A0N,24,36^FB125,1,0,C^FH\^FDTASSEN^FS^FT358,421^A0N,24,36^FB108,1,0,C^FH\^FDDROOG^FS^FT198,421^A0N,24,36^FB101,1,0,C^FH\^FDDOZEN^FS^FT544,421^A0N,24,36^FB231,1,0,C^FH\^FDBEZORGDATUM^FS^FT536,275^A0N,24,36^FB247,1,0,C^FH\^FDINGEPAKT DOOR^FS^FT537,347^A0N,24,36^FB245,1,0,C^FH\^FDORDERNUMMER^FS')
 

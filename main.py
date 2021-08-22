@@ -1,11 +1,15 @@
 from tkinter import *
+from tkinter import ttk
+from labelfunctions import *
 from PIL import ImageTk, Image
-import sys
-import importlib
 from pathlib import Path
+import configparser
+import importlib
 import tkinter.messagebox as mbox
 import io
-from labelfunctions import *
+import sys
+import ast
+
 
    
 class MainDialog:
@@ -14,11 +18,17 @@ class MainDialog:
         self.Path = Path(__file__).parent
         self.Assets = self.Path / Path("./assets")
         self.QuantityVars = {var: IntVar() for var in ['DeliveryNo', 'BoxQty', 'BagQty', 'DryQty']}
-        self.DataVars = {var: StringVar() for var in ['QRString','StatusMsg', 'Name', 'Street', 'Zip', 'City', 'Phone']}         
+        self.DataVars = {var: StringVar() for var in ['Operator', 'StatusMsg', 'QRString', 'DeliveryDate', 'OrderNr', 'Name', 'Street', 'Zip', 'City', 'Phone']}        
+        self.config = configparser.ConfigParser()
+        self.config.read(self.Path / Path("./config.ini"))  
+        self.OperatorNames = ast.literal_eval(self.config.get('Operators', 'OPERATOR_NAMES'))        
         self.PlaceRootCanvas()
-        self.ZPLF = ZPLFunctions()     
+        self.ZPLF = ZPLFunctions()  
+        self.DataVars['Operator'].set('Mike')
         self.QuantityVars['DeliveryNo'].set(50)
- 
+        
+        
+        
     def AppAssets(self, path: str) -> Path:
         return self.Assets / Path(path)
     
@@ -32,7 +42,20 @@ class MainDialog:
             highlightthickness = 0,
             relief = "ridge"
         )
+                  
 
+        self.BackgroundImage = PhotoImage(file=self.AppAssets("RootBg.png"))
+        self.RootCanvas.create_image(0, 0, image=self.BackgroundImage, anchor=NW)          
+                  
+        self.OperatorNamesVar = self.DataVars['Operator']
+        self.OperatorMenu = ttk.OptionMenu(
+            self.master,
+            self.OperatorNamesVar,
+            self.OperatorNamesVar.get(),
+            *self.OperatorNames,
+            style='my.TMenubutton'
+            )     
+            
         self.RootCanvas.place(x = 0, y = 0)
         self.RootCanvas.create_rectangle(
             420.0,
@@ -49,7 +72,28 @@ class MainDialog:
             825.0,
             fill="#777777",
             outline="")
+            
+        self.QRImage = PhotoImage(file=self.AppAssets("QRImg.png"))
+        self.RootCanvas.create_image(930, 380, image=self.QRImage, anchor=NW) 
 
+        self.RootCanvas.create_text(
+            459.0,
+            294.0,
+            anchor="nw",
+            text="Selecteer operator",
+            fill="#000000",
+            font=("OpenSans Regular", 36 * -1)
+        )
+
+        style = ttk.Style()
+        style.configure('my.TMenubutton', font=('OpenSans Regular', 16), background='#FFFFFF')  
+        # self.OperatorMenu.config(font=("OpenSans Light", 16), bg='white', relief=FLAT)
+        self.OperatorMenu.place(
+            x=459.0,
+            y=364.0,
+            width=200.0,
+            height=50.0,
+        )
         self.RootCanvas.create_text(
             894.0,
             294.0,
@@ -74,129 +118,21 @@ class MainDialog:
             # width=219.0,
             # height=34.0
         # )
-
-        self.RootCanvas.create_rectangle(
-            651.0,
-            288.0,
-            801.0,
-            438.0,
-            fill="#EBEBEB",
-            outline="")
-
-        self.RootCanvas.create_rectangle(
-            463.0,
-            287.0,
-            613.0,
-            437.0,
-            fill="#000000",
-            outline="")
-
-        self.RootCanvas.create_rectangle(
-            651.0,
-            475.0,
-            801.0,
-            625.0,
-            fill="#EBEBEB",
-            outline="")
-
-        self.RootCanvas.create_rectangle(
-            463.0,
-            475.0,
-            613.0,
-            625.0,
-            fill="#EBEBEB",
-            outline="")
-
-        self.RootCanvas.create_rectangle(
-            651.0,
-            662.0,
-            801.0,
-            812.0,
-            fill="#EBEBEB",
-            outline="")
-
-        self.RootCanvas.create_rectangle(
-            463.0,
-            662.0,
-            613.0,
-            812.0,
-            fill="#EBEBEB",
-            outline="")
-
-        self.RootCanvas.create_text(
-            486.0,
-            341.0,
-            anchor="nw",
-            text="MIKE",
-            fill="#FFFFFF",
-            font=("Raleway Regular", 36 * -1)
-        )
-
-        self.RootCanvas.create_text(
-            492.0,
-            716.0,
-            anchor="nw",
-            text="LIZE",
-            fill="#000000",
-            font=("Raleway Regular", 36 * -1)
-        )
-
-        self.RootCanvas.create_text(
-            675.0,
-            716.0,
-            anchor="nw",
-            text="NICK",
-            fill="#000000",
-            font=("Raleway Regular", 36 * -1)
-        )
-
-        self.RootCanvas.create_text(
-            476.0,
-            533.0,
-            anchor="nw",
-            text="SJAAN",
-            fill="#000000",
-            font=("Raleway Regular", 32 * -1)
-        )
-
-        self.RootCanvas.create_text(
-            660.0,
-            533.0,
-            anchor="nw",
-            text="IWONA",
-            fill="#000000",
-            font=("Raleway Regular", 32 * -1)
-        )
-
-        self.RootCanvas.create_text(
-            669.0,
-            340.0,
-            anchor="nw",
-            text="JENN",
-            fill="#000000",
-            font=("Raleway Regular", 36 * -1)
-)
-
-        self.QREntryImg = PhotoImage(
-            file=self.AppAssets("QREntry.png"))
-        self.QREntryBg = self.RootCanvas.create_image(
-            1148.5,
-            749.5,
-            image=self.QREntryImg
-        )
         self.BulletChar = "\u2022" #Specification of bullet character
         self.QREntry = Entry(
             bd=0,
-            bg="#CEDBFF",
+            bg="#FFFFFF",
             show=self.BulletChar,
-            highlightthickness=0,
+            highlightthickness=2,
+            highlightcolor='#7E1E1D',
+            fg='#7E1E1D',
             textvariable=self.DataVars['QRString']
         )
         self.QREntry.place(
             x=904.0,
-            y=732.0,
+            y=782.0,
             width=489.0,
-            height=33.0
+            height=23.0
         )
         self.StatusMessage = Label(
             textvariable=self.DataVars['StatusMsg'],
@@ -206,7 +142,7 @@ class MainDialog:
         self.StatusMessage.config(font=("OpenSans Light", 16))
         self.StatusMessage.place(
             x=904.0,
-            y=683.0,
+            y=733.0,
         )
         self.QREntry.bind(('<Return>'),lambda event:self.QRDecode())
         self.QREntry.focus()
@@ -222,16 +158,17 @@ class MainDialog:
             highlightthickness = 0,
             relief = "ridge"
         )
-
+        self.BackgroundImage = PhotoImage(file=self.AppAssets("RootBg.png"))
+        self.EntryCanvas.create_image(0, 0, image=self.BackgroundImage, anchor=NW)  
+        
         self.EntryCanvas.place(x = 0, y = 0)
         self.EntryCanvas.create_rectangle(
             420.0,
             236.0,
             1500.0,
-            844.0,
+            854.0,
             fill="#FFFFFF",
             outline="")
-
         self.EntryCanvas.create_rectangle(
             861.0,
             265.0,
@@ -257,12 +194,21 @@ class MainDialog:
             fill="#13799F",
             font=("OpenSans Regular", 36 * -1)
         )
+        
+        self.EntryCanvas.create_text(
+            458.0,
+            550.0,
+            anchor="nw",
+            text="Order info",
+            fill="#13799F",
+            font=("OpenSans Regular", 36 * -1)
+)
 
         self.NameEntry = Entry(
             bd=0,
             bg="#FFFFFF",
             highlightthickness=0,
-            font=("Raleway Regular", 21 * -1),
+            font=("OpenSans Light", 21 * -1),
             textvariable=self.DataVars['Name']
         )
         self.NameEntry.place(
@@ -276,7 +222,7 @@ class MainDialog:
             bd=0,
             bg="#FFFFFF",
             highlightthickness=0,
-            font=("Raleway Regular", 21 * -1),
+            font=("OpenSans Light", 21 * -1),
             textvariable=self.DataVars['Street']
         )
         self.StreetEntry.place(
@@ -290,7 +236,7 @@ class MainDialog:
             bd=0,
             bg="#FFFFFF",
             highlightthickness=0,
-            font=("Raleway Regular", 21 * -1),
+            font=("OpenSans Light", 21 * -1),
             textvariable=self.DataVars['Zip']
         )
         self.ZipEntry.place(
@@ -304,7 +250,7 @@ class MainDialog:
             bd=0,
             bg="#FFFFFF",
             highlightthickness=0,
-            font=("Raleway Regular", 21 * -1),
+            font=("OpenSans Light", 21 * -1),
             textvariable=self.DataVars['City']
         )
         self.CityEntry.place(
@@ -318,7 +264,7 @@ class MainDialog:
             bd=0,
             bg="#FFFFFF",
             highlightthickness=0,
-            font=("Raleway Regular", 21 * -1),
+            font=("OpenSans Light", 21 * -1),
             textvariable=self.DataVars['Phone']
         )
         self.PhoneEntry.place(
@@ -327,6 +273,53 @@ class MainDialog:
             width=389.0,
             height=33.0
         )
+        
+        self.EntryCanvas.create_text(
+            458.0,
+            607.0,
+            anchor="nw",
+            text="Ordernr:",
+            fill="#3E3E3E",
+            font=("OpenSans Light", 21 * -1)
+        )    
+            
+        self.EntryCanvas.create_text(
+            458.0,
+            656.0,
+            anchor="nw",
+            text="Bezorgdatum:",
+            fill="#3E3E3E",
+            font=("OpenSans Light", 21 * -1)
+        )
+
+        self.OrderNrEntry = Entry(
+            bd=0,
+            bg="#FFFFFF",
+            highlightthickness=0,
+            font=("OpenSans Light", 21 * -1),
+            textvariable=self.DataVars['OrderNr']
+        )
+        self.OrderNrEntry.place(
+            x=624.0,
+            y=604.0,
+            width=213.0,
+            height=33.0
+        )
+
+        self.DeliveryDateEntry = Entry(
+            bd=0,
+            bg="#FFFFFF",
+            highlightthickness=0,
+            font=("OpenSans Light", 21 * -1),
+            textvariable=self.DataVars['DeliveryDate']
+        )
+        self.DeliveryDateEntry.place(
+            x=624.0,
+            y=652.0,
+            width=213.0,
+            height=33.0
+        )  
+          
         self.EntryCanvas.create_text(
             926.0,
             388.0,
@@ -371,7 +364,7 @@ class MainDialog:
         )
         self.ReturnBtn.place(
             x=1010.0,
-            y=765.0,
+            y=775.0,
             width=219.0,
             height=54.0
         )
@@ -387,7 +380,7 @@ class MainDialog:
         )
         self.PrintBtn.place(
             x=1256.0,
-            y=765.0,
+            y=775.0,
             width=219.0,
             height=54.0
         )
@@ -449,12 +442,14 @@ class MainDialog:
                 x=1135.0,
                 y=382.0 + (i * 85),
             )
-#Print Splash Window            
+        for entry in [self.NameEntry, self.StreetEntry, self.ZipEntry, self.CityEntry, self.PhoneEntry, self.OrderNrEntry, self.DeliveryDateEntry]:
+            entry.config(fg='#3E3E3E')    
+            
+#Start of Printing canvas      
     def PlacePrintCanvas(self):
         self.PrintBtn.config(state=DISABLED)
         self.PrintQty = IntVar()
         self.PrintQty.set(self.Quantities)
-        # self.StatusLabel = Label(self.PrintFrame, textvariable=self.StatusVariable, font=("Calibri", 18), bg='white')
         self.PrintCanvas = Canvas(
             self.master,
             bg = "#FFFFFF",
@@ -599,8 +594,8 @@ class MainDialog:
 
         while True:
             try:
-                qr_lst = QRString.strip('/><=').split(',')
-                v_nme, v_str, v_zip, v_cty, v_tel, validate = qr_lst
+                qr_lst = QRString.strip('><=').split(',')
+                v_nme, v_str, v_zip, v_cty, v_tel, v_ddt, v_onr, validate = qr_lst
                 break
             except ValueError:
                 self.DataVars['StatusMsg'].set('Gescande code is niet geldig!')
@@ -616,6 +611,8 @@ class MainDialog:
         self.DataVars['Zip'].set(v_zip)
         self.DataVars['City'].set(v_cty)
         self.DataVars['Phone'].set(v_tel)
+        self.DataVars['DeliveryDate'].set(v_ddt)
+        self.DataVars['OrderNr'].set(v_onr)
         self.QREntry.delete(0, 'end')
         self.PlaceEntryCanvas()
         
@@ -641,7 +638,7 @@ class MainDialog:
 
     def SetLabelVars(self):
         LabelVars = []
-        for var in [self.QuantityVars['DeliveryNo'], self.QuantityVars['BagQty'], self.QuantityVars['BoxQty'], self.QuantityVars['DryQty'], self.DataVars['Name'], self.DataVars['Street'], self.DataVars['Zip'], self.DataVars['City'], self.DataVars['Phone']]:
+        for var in [self.QuantityVars['DeliveryNo'], self.QuantityVars['BagQty'], self.QuantityVars['BoxQty'], self.QuantityVars['DryQty'], self.DataVars['Name'], self.DataVars['Street'], self.DataVars['Zip'], self.DataVars['City'], self.DataVars['Phone'],self.DataVars['Operator'], self.DataVars['DeliveryDate'], self.DataVars['OrderNr']]:
             LabelVar = var.get()
             LabelVars.append(LabelVar)
         self.ZPLF.BuildLabel(LabelVars, self.Quantities)
