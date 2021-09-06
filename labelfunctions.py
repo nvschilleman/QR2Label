@@ -3,6 +3,8 @@ from simple_zpl2 import ZPLDocument
 from PIL import Image
 import configparser
 import socket
+from pathlib import Path
+
 
 
 
@@ -104,9 +106,10 @@ class ZPLFunctions:
         # self.printer.send_job(self.zpl)
         
     def Printer(self):
-        config = configparser.ConfigParser()
-        config.read('/home/share/config.ini')
-        self.PrinterIP = config.get('Network', 'PRINTER_IP_ADDRESS')
+        self.Path = Path(__file__).parent
+        self.config = configparser.ConfigParser()
+        self.config.read(self.Path / Path("./config.ini"))
+        self.PrinterIP = self.config.get('Network', 'PRINTER_IP_ADDRESS')
         printer = NetworkPrinter(str(self.PrinterIP))
         printer.print_zpl(self.zpl)    
     
