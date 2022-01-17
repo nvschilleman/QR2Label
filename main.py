@@ -17,7 +17,7 @@ class MainDialog:
         self.config = configparser.ConfigParser()
         self.config.read(self.Path / Path("./config.ini"))  
         self.OperatorNames = ast.literal_eval(self.config.get('Operators', 'OPERATOR_NAMES'))  
-        self.IntVars = {var: IntVar() for var in ['DryQty', 'BagQty', 'BoxQty', 'DeliveryNo']}
+        self.IntVars = {var: IntVar() for var in ['DryQty', 'BoxQty', 'DeliveryNo']}
         self.DataVars = {var: StringVar() for var in ['Operator', 'StatusMsg', 'QRString', 'OrderType', 'DateCaption', 'Date', 'OrderNr', 'Name', 'Street', 'Zip', 'City', 'Phone']}        
         self.OperatorButton = {var:Radiobutton() for var in self.OperatorNames}
         self.ZPLF = ZPLFunctions()  
@@ -26,12 +26,9 @@ class MainDialog:
         self.IntVars['DeliveryNo'].set(50)
         self.CustomerData = [self.DataVars['Name'], self.DataVars['Street'], self.DataVars['Zip'], self.DataVars['City'], self.DataVars['Phone'], self.DataVars['OrderNr']]   
         self.PlaceRootCanvas()
-
-        print('Init')
+        #self.PlaceEntryCanvas()
         
-        for var in self.CustomerData:
-            print(var)
-
+        print('Init')
 
     def AppAssets(self, path: str) -> Path:
         return self.Assets / Path(path)
@@ -309,7 +306,7 @@ class MainDialog:
             style='my.DateEntry',
             background='#13799F',
             locale='nl_NL',
-            date_pattern='dd/mm/yyyy',
+            date_pattern='dd-mm-yyyy',
             bd=0,
             highlightthickness=0,
             font=("OpenSans Light", 21 * -1),
@@ -531,14 +528,14 @@ class MainDialog:
 
         #Create fields loop
 
-        self.IntVar = [self.IntVars['DryQty'], self.IntVars['BoxQty'], self.IntVars['BagQty'], self.IntVars['DeliveryNo']]
-        self.Captions = ['Aantal droog:','Aantal dozen:','Aantal tassen:','Bestemming:']
+        self.IntVar = [self.IntVars['DryQty'], self.IntVars['BoxQty'], self.IntVars['DeliveryNo']]
+        self.Captions = ['Aantal droog:','Aantal dozen:','Bestemming:']
         if self.DataVars['OrderType'].get() == 'C':
             self.DataVars['DateCaption'].set('Afhaaldatum:') 
             s = 35                       
             if self.IntVars['DeliveryNo'] in self.IntVar:
                 # self.DeliveryN = self.IntVars['DeliveryNo'].get()
-                del self.IntVar[3]
+                del self.IntVar[2]
                 print(self.IntVar)  
         elif self.DataVars['OrderType'].get() == 'D':
             self.DataVars['DateCaption'].set('Bezorgdatum:') 
@@ -551,7 +548,7 @@ class MainDialog:
 
             self.EntryCanvas.create_text(
                 926.0,
-                643.0 - s - (i * 85),
+                600.0 - s - (i * 85),
                 anchor="nw",
                 text=str(self.Captions[i]),
                 fill="#3E3E3E",
@@ -568,7 +565,7 @@ class MainDialog:
             )
             self.PlusBtn.place(
                 x=1323.0,
-                y=626.0 - s - (i * 85),
+                y=583.0 - s - (i * 85),
                 width=55.0,
                 height=55.0
             )
@@ -583,7 +580,7 @@ class MainDialog:
             )
             self.MinusBtn.place(
                 x=1243.0,
-                y=626.0 - s - (i * 85),
+                y=583.0 - s - (i * 85),
                 width=55.0,
                 height=55.0
             )  
@@ -593,12 +590,13 @@ class MainDialog:
                 fg='#3E3E3E',
                 bg='#FFFFFF',
                 width='3'
-                
+
+
             )
             self.QuantityLabel.config(font=("Open Sans", 34 * -1))
             self.QuantityLabel.place(
                 x=1135.0,
-                y=637.0 - s - (i * 85),
+                y=594.0 - s - (i * 85),
             )
          
             
@@ -705,19 +703,21 @@ class MainDialog:
             self.ZPLF.Printer()
             self.DataVars['StatusMsg'].set('Opdracht verzenden naar printer...')
         except Exception:
-            # self.DataVars['StatusMsg'].set('Kan niet verbinden met printer!')
-            # self.PrinterStatus.config(fg='red')    
-            raise
+            self.DataVars['StatusMsg'].set('Kan niet verbinden met printer!')
+            self.PrinterStatus.config(fg='red')
+            self.master.after(3500, self.PlaceEntryCanvas)         
+            # raise
         else: 
             self.DataVars['StatusMsg'].set('Opdracht succesvol verzonden!')
             self.master.after(3500, self.ReturnToRoot)
             
     def ReturnToRoot(self):
-        DeliveryNo = self.IntVars['DeliveryNo'].get()
-        DeliveryNo -= 1
-        self.IntVars['DeliveryNo'].set(DeliveryNo)
+        if self.DataVars['OrderType'].get() == 'D':
+            DeliveryNo = self.IntVars['DeliveryNo'].get()
+            DeliveryNo -= 1
+            self.IntVars['DeliveryNo'].set(DeliveryNo)
         
-        for var in [self.IntVars['BagQty'], self.IntVars['BoxQty'], self.IntVars['DryQty']]:
+        for var in [self.IntVars['BoxQty'], self.IntVars['DryQty']]:
             var.set(0)
 
         for var in self.CustomerData:
@@ -836,7 +836,7 @@ class MainDialog:
         variable.set(item)   
         
     def PrintValidation(self):
-        self.Quantities = self.IntVars['BagQty'].get() + self.IntVars['BoxQty'].get() + self.IntVars['DryQty'].get()
+        self.Quantities = self.IntVars['BoxQty'].get() + self.IntVars['DryQty'].get()
         
         if self.Quantities == 0:
             mbox.showerror(title='Foutmelding', message='Er zijn geen aantallen ingevuld!')
@@ -845,7 +845,7 @@ class MainDialog:
 
     def SetLabelVars(self):
         LabelVars = [self.DataVars['OrderType'].get()]
-        for var in [self.IntVars['DeliveryNo'], self.IntVars['BagQty'], self.IntVars['BoxQty'], self.IntVars['DryQty'], self.DataVars['Name'], self.DataVars['Street'], self.DataVars['Zip'], self.DataVars['City'], self.DataVars['Phone'],self.DataVars['Operator'], self.DataVars['Date'], self.DataVars['OrderNr']]:
+        for var in [self.IntVars['DeliveryNo'], self.IntVars['BoxQty'], self.IntVars['DryQty'], self.DataVars['Name'], self.DataVars['Street'], self.DataVars['Zip'], self.DataVars['City'], self.DataVars['Phone'],self.DataVars['Operator'], self.DataVars['Date'], self.DataVars['OrderNr']]:
             LabelVar = var.get()
             LabelVars.append(LabelVar)
         self.ZPLF.BuildLabel(LabelVars, self.Quantities)
@@ -855,7 +855,7 @@ class MainDialog:
 def main(): 
     root = Tk()
     root.title('NOVA QR2Label v1.5')
-    # root.configure(cursor='none')
+    root.configure(cursor='none')
     
     
     # root.wm_overrideredirect(True)
