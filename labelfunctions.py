@@ -30,9 +30,12 @@ class ZPLFunctions:
 
         #Alignment settings and shared label borders
         self.zpl.add_zpl_raw('^MMT^PW831^LL0440^LS0'
-                             '^FO0,20^GFA,46592,46592,00104,:Z64:eJzszTERgDAUBbDPMTAiASmVBtKQggRGBq7FxRu4xEBqHgFXVUs8vSrRjHFMmedcMs+9Zp4n9WyZ5009LfP09lbA1tudeJbYs18ej8fj8Xg8Ho/H4/F4PB6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+PxeDyePzwfAAAA///t1LENgCAARUGsLBnBUVjN0RiJ0sKgW/wQcm+B6x6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XDWcNrYzPkixZwr47wpp2acJ+WcGWccGaeXjHOXlmBmYjrStv2w2OoE:11E9'
+                             
                              '^FO496,377^GB329,0,5^FS^FO6,233^GB818,0,5^FS^FO496,305^GB329,0,5^FS^FO247,236^GB0,216,5^FS^FO491,236^GB0,216,5^FS')
 
+        # Former line 33 - '^FO0,20^GFA,46592,46592,00104,:Z64:eJzszTERgDAUBbDPMTAiASmVBtKQggRGBq7FxRu4xEBqHgFXVUs8vSrRjHFMmedcMs+9Zp4n9WyZ5009LfP09lbA1tudeJbYs18ej8fj8Xg8Ho/H4/F4PB6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+PxeDwej8fj8Xg8Ho/H4/F4PB6Px+PxeDyePzwfAAAA///t1LENgCAARUGsLBnBUVjN0RiJ0sKgW/wQcm+B6x6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XDWcNrYzPkixZwr47wpp2acJ+WcGWccGaeXjHOXlmBmYjrStv2w2OoE:11E9'
+        
+        
         #Order quantity data fields
         self.zpl.add_field_origin(62, 290)
         self.zpl.add_field_block(180,1,0,'C')
